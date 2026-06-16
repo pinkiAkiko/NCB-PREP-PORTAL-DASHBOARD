@@ -6,4 +6,3 @@ export default function NewReturn() {
     <PlaceholderScreen title="File New Return" parentTitle="Returns Filing" parentLink="/returns" description="Filing wizard coming next." />
   );
 }
-

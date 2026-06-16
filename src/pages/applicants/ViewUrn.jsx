@@ -6,4 +6,3 @@ export default function ViewUrn() {
     <PlaceholderScreen title="View URN Details" parentTitle="My URNs" parentLink="/urns" description="Detailed view of URN coming next." />
   );
 }
-
