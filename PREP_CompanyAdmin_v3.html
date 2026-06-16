@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PREP Portal — Company Admin</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  background: #EAECF0; color: #1A2332; font-size: 13px; min-height: 100vh;
+}
+
+/* ── Header ── */
+.header {
+  background: #1E2A3A; height: 54px;
+  display: flex; align-items: center; padding: 0 16px;
+  justify-content: space-between;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  border-bottom: 1px solid #263040;
+}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.hamburger {
+  width: 34px; height: 34px; border-radius: 5px;
+  background: #263040; border: 1px solid #2E3F54;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; color: #8B98A8; font-size: 16px;
+  user-select: none;
+}
+.hamburger:hover { background: #2E3F54; color: #CBD5E0; }
+.header-logo {
+  background: #B8721A; color: #fff; width: 34px; height: 34px;
+  border-radius: 6px; display: flex; align-items: center;
+  justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;
+}
+.header-title { color: #E2E8F0; font-size: 13px; font-weight: 600; }
+.header-subtitle { color: #4A5A6A; font-size: 10px; margin-top: 1px; }
+.header-right { display: flex; align-items: center; gap: 18px; }
+.header-icon-btn {
+  position: relative; cursor: pointer; color: #6A7A8A;
+  font-size: 12px; display: flex; align-items: center; gap: 4px;
+}
+.notif-badge {
+  position: absolute; top: -5px; right: -7px;
+  background: #C0392B; color: #fff; border-radius: 50%;
+  width: 15px; height: 15px; font-size: 9px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.header-user {
+  display: flex; align-items: center; gap: 9px;
+  cursor: pointer; padding: 4px 8px; border-radius: 4px;
+  border: 1px solid #263040;
+}
+.user-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: #263040; border: 1.5px solid #3A4F66;
+  display: flex; align-items: center; justify-content: center;
+  color: #7A9AB8; font-size: 10px; font-weight: 700; flex-shrink: 0;
+}
+.user-name { color: #CBD5E0; font-size: 12px; font-weight: 500; }
+.user-role-label { color: #4A5A6A; font-size: 10px; }
+
+/* ── App Shell ── */
+.app-shell { display: flex; margin-top: 54px; min-height: calc(100vh - 54px); }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 215px; flex-shrink: 0; background: #1A2438;
+  display: flex; flex-direction: column; border-right: 1px solid #222F40;
+  position: sticky; top: 54px; height: calc(100vh - 54px);
+  overflow: hidden; transition: width 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+.sidebar.collapsed { width: 52px; }
+
+.sidebar-entity {
+  padding: 14px 15px 12px; border-bottom: 1px solid #222F40;
+  overflow: hidden; white-space: nowrap;
+}
+.sidebar.collapsed .sidebar-entity {
+  padding: 10px 0; display: flex; justify-content: center;
+}
+.sidebar-entity-name { color: #BCC8D8; font-size: 12px; font-weight: 600; line-height: 1.35; }
+.sidebar-entity-sub { color: #4A5A6A; font-size: 10px; margin-top: 3px; }
+.sidebar-urn-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #222F40; border-radius: 3px; padding: 3px 7px;
+  margin-top: 7px; color: #5A8AB8; font-size: 10px; font-weight: 600;
+}
+.urn-dot { width: 6px; height: 6px; border-radius: 50%; background: #1E7B4B; display: inline-block; }
+.sidebar-collapsed-avatar {
+  display: none; width: 32px; height: 32px; border-radius: 6px;
+  background: #222F40; border: 1px solid #2E3F54;
+  align-items: center; justify-content: center;
+  color: #5A8AB8; font-size: 10px; font-weight: 700;
+}
+.sidebar.collapsed .sidebar-entity-name,
+.sidebar.collapsed .sidebar-entity-sub,
+.sidebar.collapsed .sidebar-urn-chip { display: none; }
+.sidebar.collapsed .sidebar-collapsed-avatar { display: flex; }
+
+.nav-group-label {
+  padding: 12px 15px 3px; font-size: 9.5px; text-transform: uppercase;
+  letter-spacing: 0.1em; color: #354555; font-weight: 600;
+  white-space: nowrap;
+}
+.sidebar.collapsed .nav-group-label { display: none; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 15px; cursor: pointer; font-size: 12px; color: #7A8A9A;
+  transition: background 0.12s, color 0.12s; user-select: none;
+  position: relative; white-space: nowrap;
+}
+.nav-item:hover { background: #1F2E40; color: #BCC8D8; }
+.nav-item.active {
+  background: #1F2E40; color: #FFFFFF;
+  border-left: 3px solid #B8721A; padding-left: 12px;
+}
+.sidebar.collapsed .nav-item { justify-content: center; padding: 10px 0; }
+.sidebar.collapsed .nav-item.active { border-left: 3px solid #B8721A; padding-left: 0; }
+
+.nav-icon {
+  width: 18px; height: 18px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; background: #263040; border-radius: 3px;
+}
+.nav-item.active .nav-icon { background: #2E3F54; }
+.nav-label { flex: 1; }
+.sidebar.collapsed .nav-label { display: none; }
+.nav-badge {
+  background: #C0392B; color: #fff; border-radius: 9px;
+  padding: 1px 6px; font-size: 9px; font-weight: 700; flex-shrink: 0;
+}
+.sidebar.collapsed .nav-badge { display: none; }
+.nav-arrow { font-size: 9px; color: #4A5A6A; flex-shrink: 0; transition: transform 0.18s; }
+.nav-arrow.open { transform: rotate(180deg); }
+.sidebar.collapsed .nav-arrow { display: none; }
+
+.nav-sub-group { overflow: hidden; }
+.nav-sub {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 15px 6px 38px; font-size: 11px; color: #3E5168; cursor: pointer;
+}
+.nav-sub:hover { color: #8A9AB0; background: #1C2B3A; }
+.nav-sub-dot { width: 5px; height: 5px; border-radius: 50%; background: #2E3F54; flex-shrink: 0; }
+.sidebar.collapsed .nav-sub-group { display: none; }
+
+.nav-tooltip {
+  display: none; position: absolute; left: 58px; top: 50%;
+  transform: translateY(-50%); background: #1A2438;
+  border: 1px solid #2E3F54; border-radius: 4px;
+  padding: 5px 10px; font-size: 11px; color: #CBD5E0;
+  white-space: nowrap; z-index: 9998; pointer-events: none;
+}
+.sidebar.collapsed .nav-item:hover .nav-tooltip { display: block; }
+
+.sidebar-note {
+  padding: 12px 15px; font-size: 10px; color: #2A3A4A;
+  line-height: 1.6; border-top: 1px solid #222F40; margin-top: auto;
+}
+.sidebar.collapsed .sidebar-note { display: none; }
+
+/* ── Main ── */
+.main { flex: 1; padding: 18px 20px; overflow: auto; min-width: 0; }
+
+/* ── Breadcrumb ── */
+.breadcrumb { font-size: 11px; color: #8B98A8; margin-bottom: 14px; }
+.breadcrumb a { color: #2E6EBF; cursor: pointer; text-decoration: none; }
+.breadcrumb span { color: #4A5A6A; }
+
+/* ── Page header ── */
+.page-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; margin-bottom: 16px;
+}
+.page-greeting { font-size: 17px; font-weight: 600; color: #1A2332; }
+.page-sub { font-size: 12px; color: #5A6474; margin-top: 3px; }
+.page-session {
+  font-size: 10px; color: #8B98A8; text-align: right; line-height: 1.7;
+  background: #fff; border: 1px solid #E0E4E8; border-radius: 4px; padding: 6px 10px;
+}
+
+/* ── KPI Cards ── */
+.kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
+.kpi-card {
+  background: #fff; border: 1px solid #E0E4E8; border-radius: 6px;
+  padding: 14px 15px; border-top: 3px solid; cursor: pointer;
+}
+.kpi-card:hover { border-color: #C8D0D8; }
+.kpi-label { font-size: 10px; color: #8B98A8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 7px; }
+.kpi-value { font-size: 28px; font-weight: 700; line-height: 1; }
+.kpi-note { font-size: 10px; margin-top: 5px; font-weight: 500; }
+.kpi-cta { font-size: 11px; color: #2E6EBF; margin-top: 7px; }
+
+/* ── Content panels ── */
+.content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.panel { background: #fff; border: 1px solid #E0E4E8; border-radius: 6px; }
+.section-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; border-bottom: 1px solid #EAECF0;
+}
+.section-title { font-size: 11px; font-weight: 700; color: #3A4A5A; text-transform: uppercase; letter-spacing: 0.07em; }
+.section-link { font-size: 11px; color: #2E6EBF; cursor: pointer; }
+
+/* ── Notifications ── */
+.notif-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 14px; border-bottom: 1px solid #F2F4F6;
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-indicator { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.notif-body { flex: 1; min-width: 0; }
+.notif-tag {
+  display: inline-block; padding: 1px 5px; border-radius: 3px;
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; margin-bottom: 3px;
+}
+.notif-text { font-size: 12px; color: #1A2332; line-height: 1.4; }
+.notif-meta { font-size: 10px; color: #8B98A8; margin-top: 2px; }
+
+/* ── Pending Actions ── */
+.action-item { padding: 11px 14px; border-bottom: 1px solid #F2F4F6; }
+.action-item:last-child { border-bottom: none; }
+.action-status-badge {
+  display: inline-block; padding: 2px 6px; border-radius: 3px;
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; margin-bottom: 5px;
+}
+.action-title { font-size: 12px; font-weight: 600; color: #1A2332; margin-bottom: 2px; }
+.action-meta { font-size: 11px; color: #7A8A9A; line-height: 1.5; margin-bottom: 7px; }
+.action-btn {
+  display: inline-block; padding: 5px 12px; border: 1px solid #2E6EBF;
+  border-radius: 4px; font-size: 11px; color: #2E6EBF; cursor: pointer;
+  background: #fff; font-family: inherit;
+}
+
+/* ── Quick Actions ── */
+.quick-section {
+  background: #fff; border: 1px solid #E0E4E8;
+  border-radius: 6px; padding: 12px 14px; margin-top: 12px;
+}
+.quick-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-top: 10px; }
+.quick-tile {
+  border: 1px solid #E0E4E8; border-radius: 5px;
+  padding: 12px 8px; text-align: center; cursor: pointer; background: #FAFBFC;
+}
+.quick-tile:hover { border-color: #2E6EBF; background: #F0F6FF; }
+.quick-icon {
+  width: 28px; height: 28px; border-radius: 5px; display: flex;
+  align-items: center; justify-content: center; font-size: 11px;
+  font-weight: 700; margin: 0 auto 6px; background: #EAECF0; color: #5A6474;
+}
+.quick-label { font-size: 11px; color: #3A4A5A; line-height: 1.3; }
+
+/* ── Dashboard URN table ── */
+.urn-section { background: #fff; border: 1px solid #E0E4E8; border-radius: 6px; margin-top: 12px; }
+table.urn-table { width: 100%; border-collapse: collapse; }
+.urn-table th {
+  padding: 9px 14px; text-align: left; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.07em; color: #8B98A8;
+  font-weight: 700; background: #FAFBFC; border-bottom: 1px solid #E0E4E8;
+}
+.urn-table td {
+  padding: 10px 14px; font-size: 12px; color: #1A2332;
+  border-bottom: 1px solid #F2F4F6; vertical-align: middle;
+}
+.urn-table tr:last-child td { border-bottom: none; }
+.urn-table tr:hover td { background: #FAFBFC; }
+.status-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600;
+}
+.urn-due {
+  background: #FEF3E2; color: #B7751D; border-radius: 3px;
+  padding: 1px 5px; font-size: 9px; font-weight: 600; margin-left: 5px;
+}
+.row-actions { display: flex; gap: 8px; align-items: center; }
+.rlink { font-size: 11px; color: #2E6EBF; cursor: pointer; }
+.rlink.off { color: #C0C8D0; cursor: default; position: relative; }
+.rlink.off:hover::after {
+  content: attr(data-tip); position: absolute; bottom: 110%; left: 50%;
+  transform: translateX(-50%); background: #1E2A3A; color: #CBD5E0;
+  font-size: 10px; padding: 4px 8px; border-radius: 4px; white-space: nowrap;
+  pointer-events: none; z-index: 10;
+}
+.rsep { color: #D0D5DC; font-size: 10px; }
+
+/* ══════════════════════════════
+   MY URNs PAGE STYLES
+═══════════════════════════════ */
+.myurns-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+}
+.page-title { font-size: 17px; font-weight: 600; color: #1A2332; }
+.page-title-sub { font-size: 12px; color: #5A6474; margin-top: 3px; }
+.btn-primary {
+  background: #1E4A8A; color: #fff; border: none; border-radius: 5px;
+  padding: 8px 16px; font-size: 12px; font-weight: 600; cursor: pointer;
+  font-family: inherit; letter-spacing: 0.02em;
+}
+.btn-primary:hover { background: #163D72; }
+
+/* Summary strip */
+.summary-strip {
+  display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.summary-chip {
+  background: #fff; border: 1px solid #E0E4E8; border-radius: 5px;
+  padding: 8px 14px; display: flex; align-items: center; gap: 8px;
+}
+.chip-value { font-size: 18px; font-weight: 700; color: #1A2332; }
+.chip-label { font-size: 11px; color: #7A8A9A; }
+.chip-divider { width: 1px; background: #E0E4E8; align-self: stretch; }
+
+/* Tabs */
+.tab-row {
+  display: flex; gap: 0; border-bottom: 1px solid #E0E4E8;
+  margin-bottom: 14px; background: #fff;
+  border-radius: 6px 6px 0 0; overflow: hidden;
+}
+.tab {
+  padding: 10px 18px; font-size: 12px; color: #7A8A9A;
+  cursor: pointer; border-bottom: 2px solid transparent;
+  user-select: none; white-space: nowrap;
+}
+.tab:hover { color: #3A4A5A; background: #FAFBFC; }
+.tab.active { color: #1A2332; border-bottom-color: #1E4A8A; font-weight: 600; background: #fff; }
+.tab-count {
+  display: inline-block; background: #EAECF0; color: #5A6474;
+  border-radius: 9px; padding: 0px 6px; font-size: 10px;
+  font-weight: 700; margin-left: 5px;
+}
+.tab.active .tab-count { background: #E0EAFA; color: #1E4A8A; }
+
+/* URN full table */
+.urn-full-table-wrap {
+  background: #fff; border: 1px solid #E0E4E8; border-radius: 0 0 6px 6px;
+  border-top: none; overflow: hidden;
+}
+table.urn-full-table { width: 100%; border-collapse: collapse; }
+.urn-full-table th {
+  padding: 9px 14px; text-align: left; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.07em; color: #8B98A8;
+  font-weight: 700; background: #FAFBFC; border-bottom: 1px solid #E0E4E8;
+}
+.urn-full-table td {
+  padding: 11px 14px; font-size: 12px; color: #1A2332;
+  border-bottom: 1px solid #F2F4F6; vertical-align: middle;
+}
+.urn-full-table tr:last-child td { border-bottom: none; }
+.urn-full-table tr:hover td { background: #FAFBFC; }
+.urn-num { font-weight: 600; color: #1A2332; display: block; }
+.urn-sub-text { font-size: 10px; color: #8B98A8; margin-top: 2px; }
+
+/* Pending row style */
+.urn-full-table tr.row-pending td { background: #FFFBF5; }
+.urn-full-table tr.row-pending:hover td { background: #FFF7EE; }
+
+.spacer { height: 30px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header class="header">
+  <div class="header-left">
+    <div class="hamburger" onclick="toggleSidebar()">&#9776;</div>
+    <div class="header-logo">P</div>
+    <div>
+      <div class="header-title">PREP Portal &nbsp;·&nbsp; Precursor Register &amp; Evaluation Portal</div>
+      <div class="header-subtitle">Narcotics Control Bureau &nbsp;|&nbsp; Ministry of Home Affairs, Government of India</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="header-icon-btn">
+      [&#9679;] Notifications
+      <span class="notif-badge">3</span>
+    </div>
+    <div class="header-icon-btn">[?] Help</div>
+    <div class="header-user">
+      <div class="user-avatar">RK</div>
+      <div>
+        <div class="user-name">Rajesh Kumar</div>
+        <div class="user-role-label">Company Admin &nbsp;·&nbsp; ABC Pharmaceuticals Ltd.</div>
+      </div>
+      <span style="color:#4A5A6A; margin-left:4px; font-size:10px;">&#9660;</span>
+    </div>
+  </div>
+</header>
+
+
+<!-- ═══════════ APP SHELL ═══════════ -->
+<div class="app-shell">
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-entity">
+      <div class="sidebar-collapsed-avatar">ABC</div>
+      <div class="sidebar-entity-name">ABC Pharmaceuticals Ltd.</div>
+      <div class="sidebar-entity-sub">CIN: U24231MH2010PLC204896</div>
+      <div class="sidebar-urn-chip"><span class="urn-dot"></span> 2 Active URNs</div>
+    </div>
+
+    <div style="flex:1; overflow-y:auto; overflow-x:hidden; padding-bottom:12px;">
+
+      <div class="nav-group-label">Main Menu</div>
+
+      <div class="nav-item active" id="nav-dashboard" onclick="showScreen('dashboard', 'nav-dashboard')">
+        <div class="nav-icon">#</div>
+        <span class="nav-label">Dashboard</span>
+        <span class="nav-tooltip">Dashboard</span>
+      </div>
+
+      <div class="nav-item" id="nav-queries" onclick="showScreen('queries','nav-queries')">
+        <div class="nav-icon">Q</div>
+        <span class="nav-label">My Queries</span>
+        <span class="nav-badge">3</span>
+        <span class="nav-tooltip">My Queries</span>
+      </div>
+
+      <div class="nav-item" id="nav-myurns" onclick="showScreen('myurns', 'nav-myurns'); expandSub('urnSub','urnArrow')">
+        <div class="nav-icon">U</div>
+        <span class="nav-label">My URNs</span>
+        <span class="nav-arrow" id="urnArrow">&#9660;</span>
+        <span class="nav-tooltip">My URNs</span>
+      </div>
+      <div class="nav-sub-group" id="urnSub" style="display:none;">
+        <div class="nav-sub" onclick="showScreen('apply-urn','nav-myurns')">
+          <span class="nav-sub-dot"></span> Apply for New URN
+        </div>
+      </div>
+
+      <div class="nav-item" id="nav-returns" onclick="showScreen('returns','nav-returns'); expandSub('returnSub','returnArrow')">
+        <div class="nav-icon">R</div>
+        <span class="nav-label">Returns Filing</span>
+        <span class="nav-badge">1 Due</span>
+        <span class="nav-arrow" id="returnArrow">&#9660;</span>
+        <span class="nav-tooltip">Returns Filing</span>
+      </div>
+      <div class="nav-sub-group" id="returnSub" style="display:none;">
+        <div class="nav-sub">
+          <span class="nav-sub-dot"></span> File New Return
+        </div>
+      </div>
+
+      <div class="nav-item" id="nav-substance" onclick="showScreen('substance','nav-substance'); expandSub('substanceSub','substanceArrow')">
+        <div class="nav-icon">S</div>
+        <span class="nav-label">Substance Records</span>
+        <span class="nav-arrow" id="substanceArrow">&#9660;</span>
+        <span class="nav-tooltip">Substance Records</span>
+      </div>
+      <div class="nav-sub-group" id="substanceSub" style="display:none;">
+        <div class="nav-sub">
+          <span class="nav-sub-dot"></span> Generate Consignment Note
+        </div>
+        <div class="nav-sub">
+          <span class="nav-sub-dot"></span> Apply for Destruction
+        </div>
+      </div>
+
+      <div class="nav-item" id="nav-ld" onclick="showScreen('ld','nav-ld'); expandSub('ldSub','ldArrow')">
+        <div class="nav-icon">!</div>
+        <span class="nav-label">Loss &amp; Damage</span>
+        <span class="nav-arrow" id="ldArrow">&#9660;</span>
+        <span class="nav-tooltip">Loss &amp; Damage</span>
+      </div>
+      <div class="nav-sub-group" id="ldSub" style="display:none;">
+        <div class="nav-sub">
+          <span class="nav-sub-dot"></span> Report Incident
+        </div>
+      </div>
+
+      <div class="nav-group-label">Account</div>
+
+      <div class="nav-item" id="nav-profile" onclick="showScreen('profile','nav-profile')">
+        <div class="nav-icon">P</div>
+        <span class="nav-label">My Profile</span>
+        <span class="nav-tooltip">My Profile</span>
+      </div>
+
+    </div>
+
+    <div class="sidebar-note">
+      Form C / D (Daily Register) is inactive until NCB activates it following the RCS Order 2013 amendment.
+    </div>
+
+  </aside>
+
+
+  <!-- ═══════════ MAIN CONTENT ═══════════ -->
+  <main class="main">
+
+
+    <!-- ─────────────────────────────
+         SCREEN: DASHBOARD
+    ──────────────────────────────── -->
+    <div id="screen-dashboard" class="screen">
+
+      <div class="breadcrumb">
+        <a onclick="showScreen('dashboard','nav-dashboard')">Home</a>
+        &nbsp;&#8250;&nbsp; <span>Dashboard</span>
+      </div>
+
+      <div class="page-header">
+        <div>
+          <div class="page-greeting">Good morning, Rajesh Kumar</div>
+          <div class="page-sub">ABC Pharmaceuticals Ltd. &nbsp;·&nbsp; Mumbai Zonal Office Jurisdiction</div>
+        </div>
+        <div class="page-session">
+          Last login: 15 Jun 2026, 06:30 PM
+        </div>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi-card" style="border-top-color:#2E6EBF;" onclick="showScreen('myurns','nav-myurns')">
+          <div class="kpi-label">Active URNs</div>
+          <div class="kpi-value" style="color:#1A2332;">2</div>
+          <div class="kpi-note" style="color:#5A6474;">Both under Mumbai Zone</div>
+          <div class="kpi-cta">View My URNs &rarr;</div>
+        </div>
+        <div class="kpi-card" style="border-top-color:#C0392B;">
+          <div class="kpi-label">Pending Queries</div>
+          <div class="kpi-value" style="color:#C0392B;">3</div>
+          <div class="kpi-note" style="color:#C0392B;">&#9888; Response required</div>
+          <div class="kpi-cta" style="color:#C0392B;">Respond now &rarr;</div>
+        </div>
+        <div class="kpi-card" style="border-top-color:#B7751D;">
+          <div class="kpi-label">Q1 2026 Return Due</div>
+          <div class="kpi-value" style="color:#B7751D;">5 days</div>
+          <div class="kpi-note" style="color:#B7751D;">&#9873; Deadline: 21 Jun 2026</div>
+          <div class="kpi-cta" style="color:#B7751D;">File now &rarr;</div>
+        </div>
+        <div class="kpi-card" style="border-top-color:#1E7B4B;">
+          <div class="kpi-label">Open Incidents</div>
+          <div class="kpi-value" style="color:#1E7B4B;">0</div>
+          <div class="kpi-note" style="color:#1E7B4B;">&#10003; No active incidents</div>
+          <div class="kpi-cta">View history &rarr;</div>
+        </div>
+      </div>
+
+      <div class="content-grid">
+
+        <div class="panel">
+          <div class="section-hd">
+            <div class="section-title">Alerts &amp; Notifications</div>
+            <div class="section-link">View all &rarr;</div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-indicator" style="background:#C0392B;"></div>
+            <div class="notif-body">
+              <div class="notif-tag" style="background:#FDECEA;color:#C0392B;">Urgent</div>
+              <div class="notif-text">Q1 2026 Quarterly Return (Form E) due in <strong>5 days</strong> — Deadline: 21 Jun 2026. Applies to both active URNs.</div>
+              <div class="notif-meta">Today, 09:00 AM &nbsp;·&nbsp; Automated reminder</div>
+            </div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-indicator" style="background:#C0392B;"></div>
+            <div class="notif-body">
+              <div class="notif-tag" style="background:#FDECEA;color:#C0392B;">Action Required</div>
+              <div class="notif-text">Query raised on Application <strong>PREP/ZO-MH/2026/00142</strong> (Acetic Anhydride) by Zonal Reviewer — response pending.</div>
+              <div class="notif-meta">13 Jun 2026, 3 days ago &nbsp;·&nbsp; Zonal Office, Mumbai</div>
+            </div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-indicator" style="background:#B7751D;"></div>
+            <div class="notif-body">
+              <div class="notif-tag" style="background:#FEF3E2;color:#B7751D;">Action Required</div>
+              <div class="notif-text">Q1 2026 Return (Form E) for URN <strong>PREP/ZO-MH/2026/00089</strong> (Ephedrine) is pending submission.</div>
+              <div class="notif-meta">10 Jun 2026, 6 days ago &nbsp;·&nbsp; Automated</div>
+            </div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-indicator" style="background:#5A6474;"></div>
+            <div class="notif-body">
+              <div class="notif-tag" style="background:#F0F2F5;color:#5A6474;">Info</div>
+              <div class="notif-text">Consignment Note <strong>#GN-2026-089</strong> acknowledged by XYZ Chemicals Pvt. Ltd.</div>
+              <div class="notif-meta">14 Jun 2026 &nbsp;·&nbsp; Consignment Records</div>
+            </div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-indicator" style="background:#1E7B4B;"></div>
+            <div class="notif-body">
+              <div class="notif-tag" style="background:#EAF5EE;color:#1E7B4B;">Resolved</div>
+              <div class="notif-text">Q4 2025 Return (Form E) reviewed by Zonal Admin — no discrepancies found.</div>
+              <div class="notif-meta">10 Jun 2026 &nbsp;·&nbsp; Zonal Office, Mumbai</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="section-hd">
+            <div class="section-title">Pending Actions</div>
+            <div style="font-size:10px;color:#C0392B;font-weight:700;">3 items require your attention</div>
+          </div>
+          <div class="action-item">
+            <div class="action-status-badge" style="background:#FDECEA;color:#C0392B;">Overdue &nbsp;·&nbsp; 3 Days</div>
+            <div class="action-title">Respond to query — URN Application</div>
+            <div class="action-meta">
+              Application PREP/ZO-MH/2026/00142 &nbsp;·&nbsp; Acetic Anhydride<br>
+              Raised by Zonal Reviewer on 13 Jun 2026<br>
+              <em>Application cannot progress until resolved.</em>
+            </div>
+            <button class="action-btn">View Query &amp; Respond &rarr;</button>
+          </div>
+          <div class="action-item">
+            <div class="action-status-badge" style="background:#FEF3E2;color:#B7751D;">Due in 5 Days &nbsp;·&nbsp; 21 Jun 2026</div>
+            <div class="action-title">File Q1 2026 Quarterly Return — Form E</div>
+            <div class="action-meta">
+              URN PREP/ZO-MH/2026/00142 &nbsp;·&nbsp; Acetic Anhydride<br>
+              Quarter: Jan – Mar 2026 &nbsp;·&nbsp; Manufacturer return
+            </div>
+            <button class="action-btn">Begin Filing &rarr;</button>
+          </div>
+          <div class="action-item">
+            <div class="action-status-badge" style="background:#FEF3E2;color:#B7751D;">Due in 5 Days &nbsp;·&nbsp; 21 Jun 2026</div>
+            <div class="action-title">File Q1 2026 Quarterly Return — Form E</div>
+            <div class="action-meta">
+              URN PREP/ZO-MH/2026/00089 &nbsp;·&nbsp; Ephedrine<br>
+              Quarter: Jan – Mar 2026 &nbsp;·&nbsp; Manufacturer return
+            </div>
+            <button class="action-btn">Begin Filing &rarr;</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="quick-section">
+        <div class="section-title">Quick Actions</div>
+        <div class="quick-grid">
+          <div class="quick-tile" onclick="showScreen('apply-urn','nav-myurns')">
+            <div class="quick-icon">+U</div>
+            <div class="quick-label">Apply for New URN</div>
+          </div>
+          <div class="quick-tile">
+            <div class="quick-icon">RF</div>
+            <div class="quick-label">File Quarterly Return</div>
+          </div>
+          <div class="quick-tile">
+            <div class="quick-icon">CN</div>
+            <div class="quick-label">Generate Consignment Note</div>
+          </div>
+          <div class="quick-tile">
+            <div class="quick-icon">!!</div>
+            <div class="quick-label">Report Loss / Damage</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="urn-section">
+        <div class="section-hd">
+          <div class="section-title">My Active URNs</div>
+          <div class="section-link" onclick="showScreen('myurns','nav-myurns')">View all &rarr;</div>
+        </div>
+        <table class="urn-table">
+          <thead>
+            <tr>
+              <th>URN Number</th>
+              <th>Controlled Substances</th>
+              <th>Registered Purpose</th>
+              <th>Zonal Office</th>
+              <th>Date Issued</th>
+              <th>Status</th>
+              <th>Q1 2026 Returns</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>PREP/ZO-MH/2026/00142</strong></td>
+              <td>
+                <div style="display:flex;flex-direction:column;gap:3px;">
+                  <span style="display:inline-block;background:#EEF2F8;color:#3A5080;border-radius:3px;padding:1px 6px;font-size:10px;font-weight:600;width:fit-content;">Acetic Anhydride</span>
+                  <span style="display:inline-block;background:#EEF2F8;color:#3A5080;border-radius:3px;padding:1px 6px;font-size:10px;font-weight:600;width:fit-content;">Ephedrine</span>
+                </div>
+              </td>
+              <td>Manufacture, Sale, Storage</td>
+              <td>Mumbai Zone</td>
+              <td>15 Feb 2026</td>
+              <td><span class="status-pill" style="background:#EAF5EE;color:#1E7B4B;">&#9679; Active</span></td>
+              <td><span class="status-pill" style="background:#FEF3E2;color:#B7751D;">2 pending</span><span class="urn-due">Due 21 Jun</span></td>
+              <td>
+                <div class="row-actions">
+                  <span class="rlink" onclick="showScreen('myurns','nav-myurns')">View</span>
+                  <span class="rsep">|</span>
+                  <span class="rlink">Request Change</span>
+                  <span class="rsep">|</span>
+                  <span class="rlink off" data-tip="Stock must be nil to surrender">Surrender</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>PREP/ZO-MH/2025/00089</strong></td>
+              <td>
+                <div style="display:flex;flex-direction:column;gap:3px;">
+                  <span style="display:inline-block;background:#EEF2F8;color:#3A5080;border-radius:3px;padding:1px 6px;font-size:10px;font-weight:600;width:fit-content;">Pseudoephedrine</span>
+                </div>
+              </td>
+              <td>Purchase, Storage, Consumption</td>
+              <td>Mumbai Zone</td>
+              <td>03 Nov 2025</td>
+              <td><span class="status-pill" style="background:#EAF5EE;color:#1E7B4B;">&#9679; Active</span></td>
+              <td><span class="status-pill" style="background:#FEF3E2;color:#B7751D;">1 pending</span><span class="urn-due">Due 21 Jun</span></td>
+              <td>
+                <div class="row-actions">
+                  <span class="rlink" onclick="showScreen('myurns','nav-myurns')">View</span>
+                  <span class="rsep">|</span>
+                  <span class="rlink">Request Change</span>
+                  <span class="rsep">|</span>
+                  <span class="rlink off" data-tip="Stock must be nil to surrender">Surrender</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="spacer"></div>
+    </div>
+
+
+    <!-- ─────────────────────────────
+         SCREEN: MY URNs
+    ──────────────────────────────── -->
+    <div id="screen-myurns" class="screen" style="display:none;">
+
+      <div class="breadcrumb">
+        <a onclick="showScreen('dashboard','nav-dashboard')">Home</a>
+        &nbsp;&#8250;&nbsp; <span>My URNs</span>
+      </div>
+
+      <div class="myurns-header">
+        <div>
+          <div class="page-title">My URNs</div>
+          <div class="page-title-sub">ABC Pharmaceuticals Ltd. &nbsp;·&nbsp; Mumbai Zonal Office Jurisdiction</div>
+        </div>
+        <button class="btn-primary" onclick="showScreen('apply-urn','nav-myurns')">+ Apply for New URN</button>
+      </div>
+
+      <!-- Summary strip -->
+      <div class="summary-strip">
+        <div class="summary-chip">
+          <div>
+            <div class="chip-value">2</div>
+            <div class="chip-label">Active URNs</div>
+          </div>
+        </div>
+        <div class="summary-chip">
+          <div>
+            <div class="chip-value" style="color:#B7751D;">1</div>
+            <div class="chip-label">Pending Approval</div>
+          </div>
+        </div>
+        <div class="summary-chip">
+          <div>
+            <div class="chip-value" style="color:#C0392B;">2</div>
+            <div class="chip-label">Returns Due</div>
+          </div>
+        </div>
+        <div class="summary-chip">
+          <div>
+            <div class="chip-value" style="color:#1E7B4B;">0</div>
+            <div class="chip-label">Inactive / Surrendered</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div style="display:flex; gap:10px; margin-bottom:12px; align-items:center;">
+        <input type="text" placeholder="Search by URN number, substance, or zone..." style="flex:1; padding:8px 12px; border:1px solid #D0D5DC; border-radius:5px; font-size:12px; font-family:inherit; color:#1A2332; background:#fff; outline:none;">
+        <select style="padding:8px 10px; border:1px solid #D0D5DC; border-radius:5px; font-size:12px; font-family:inherit; color:#5A6474; background:#fff;">
+          <option>All Zones</option>
+          <option>Mumbai Zone</option>
+          <option>Delhi Zone</option>
+        </select>
+      </div>
+
+      <!-- Tabs -->
+      <div style="background:#fff; border:1px solid #E0E4E8; border-radius:6px 6px 0 0; border-bottom:none;">
+        <div class="tab-row">
+          <div class="tab active" onclick="filterUrns('all', this)">All <span class="tab-count">3</span></div>
+          <div class="tab" onclick="filterUrns('active', this)">Active <span class="tab-count">2</span></div>
+          <div class="tab" onclick="filterUrns('pending', this)">Pending Approval <span class="tab-count">1</span></div>
+          <div class="tab" onclick="filterUrns('inactive', this)">Inactive <span class="tab-count">0</span></div>
+        </div>
+      </div>
+
+      <!-- Full URN table -->
+      <div class="urn-full-table-wrap">
+        <table class="urn-full-table">
+          <thead>
+            <tr>
+              <th>URN Number</th>
+              <th>Controlled Substances</th>
+              <th>Registered Purpose</th>
+              <th>Zonal Office</th>
+              <th>Date Issued</th>
+              <th>Status</th>
+              <th>Returns — Q1 2026</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <!-- Active row 1 — multiple substances -->
+            <tr class="row-active">
+              <td>
+                <span class="urn-num">PREP/ZO-MH/2026/00142</span>
+                <span class="urn-sub-text">Issued 15 Feb 2026</span>
+              </td>
+              <td>
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                  <span style="display:inline-block; background:#EEF2F8; color:#3A5080; border-radius:3px; padding:2px 7px; font-size:10px; font-weight:600; width:fit-content;">Acetic Anhydride</span>
+                  <span style="display:inline-block; background:#EEF2F8; color:#3A5080; border-radius:3px; padding:2px 7px; font-size:10px; font-weight:600; width:fit-content;">Ephedrine</span>
+                </div>
+              </td>
+              <td>Manufacture, Sale, Storage</td>
+              <td>Mumbai Zone</td>
+              <td>15 Feb 2026</td>
+              <td>
+                <span class="status-pill" style="background:#EAF5EE;color:#1E7B4B;">&#9679; Active</span>
+              </td>
+              <td>
+                <span style="color:#B7751D;font-size:11px;font-weight:600;">2 returns pending</span><br>
+                <span style="color:#8B98A8;font-size:10px;">One per substance &nbsp;·&nbsp; Due 21 Jun</span>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <span class="rlink">View</span>
+                  <span class="rsep">|</span>
+                  <span class="rlink">Request Change</span>
+                  <span class="rsep">|</span>
+                  <span class="rlink off" data-tip="Stock must be nil to surrender">Surrender</span>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Active row 2 — single substance -->
+            <tr class="row-active">
+              <td>
+                <span class="urn-num">PREP/ZO-MH/2025/00089</span>
+                <span class="urn-sub-text">Issued 03 Nov 2025</span>
+              </td>
+              <td>
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                  <span style="display:inline-block; background:#EEF2F8; color:#3A5080; border-radius:3px; padding:2px 7px; font-size:10px; font-weight:600; width:fit-content;">Pseudoephedrine</span>
+                </div>
+              </td>
+              <td>Purchase, Storage, Consumption</td>
+              <td>Mumbai Zone</td>
+              <td>03 Nov 2025</td>
+              <td>
+                <span class="status-pill" style="background:#EAF5EE;color:#1E7B4B;">&#9679; Active</span>
+              </td>
+              <td>
+                <span style="color:#B7751D;font-size:11px;font-weight:600;">1 return pending</span><br>
+                <span style="color:#8B98A8;font-size:10px;">Due 21 Jun 2026</span>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <span class="rlink">View</span>
+                  <span class="rsep">|</span>
+                  <span class="rlink">Request Change</span>
+                  <span class="rsep">|</span>
+                  <span class="rlink off" data-tip="Stock must be nil to surrender">Surrender</span>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Pending application row -->
+            <tr class="row-pending row-active">
+              <td>
+                <span class="urn-num" style="color:#5A6474;">Application PREP/ZO-MH/2026/APP-019</span>
+                <span class="urn-sub-text">Submitted 10 Jun 2026</span>
+              </td>
+              <td>
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                  <span style="display:inline-block; background:#F2F0FA; color:#5A4090; border-radius:3px; padding:2px 7px; font-size:10px; font-weight:600; width:fit-content;">Acetic Anhydride</span>
+                  <span style="display:inline-block; background:#F2F0FA; color:#5A4090; border-radius:3px; padding:2px 7px; font-size:10px; font-weight:600; width:fit-content;">Potassium Permanganate</span>
+                </div>
+              </td>
+              <td>Manufacture, Storage</td>
+              <td>Mumbai Zone</td>
+              <td>—</td>
+              <td>
+                <span class="status-pill" style="background:#FEF3E2;color:#B7751D;">&#9679; Under Review</span>
+              </td>
+              <td style="color:#8B98A8; font-size:11px;">Not applicable</td>
+              <td>
+                <div class="row-actions">
+                  <span class="rlink">View</span>
+                  <span class="rsep">|</span>
+                  <span class="rlink off" data-tip="Available after URN is issued">Request Change</span>
+                  <span class="rsep">|</span>
+                  <span class="rlink off" data-tip="Available after URN is issued">Surrender</span>
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <div class="spacer"></div>
+    </div>
+
+
+    <!-- ─────────────────────────────
+         SCREEN: PLACEHOLDER SCREENS
+    ──────────────────────────────── -->
+    <div id="screen-apply-urn" class="screen" style="display:none;">
+      <div class="breadcrumb">
+        <a onclick="showScreen('dashboard','nav-dashboard')">Home</a> &nbsp;&#8250;&nbsp;
+        <a onclick="showScreen('myurns','nav-myurns')">My URNs</a> &nbsp;&#8250;&nbsp;
+        <span>Apply for New URN</span>
+      </div>
+      <div style="background:#fff;border:1px solid #E0E4E8;border-radius:6px;padding:40px;text-align:center;color:#8B98A8;margin-top:20px;">
+        <div style="font-size:15px;font-weight:600;color:#3A4A5A;margin-bottom:8px;">URN Application — Form B</div>
+        <div style="font-size:12px;">This screen is up next. Pre-application checklist &rarr; Form B (multi-step wizard) &rarr; Submit.</div>
+      </div>
+    </div>
+
+    <div id="screen-queries" class="screen" style="display:none;">
+      <div class="breadcrumb"><a onclick="showScreen('dashboard','nav-dashboard')">Home</a> &nbsp;&#8250;&nbsp; <span>My Queries</span></div>
+      <div style="background:#fff;border:1px solid #E0E4E8;border-radius:6px;padding:40px;text-align:center;color:#8B98A8;margin-top:20px;">
+        <div style="font-size:15px;font-weight:600;color:#3A4A5A;margin-bottom:8px;">My Queries</div>
+        <div style="font-size:12px;">All open queries across URN applications, returns, change requests — coming next.</div>
+      </div>
+    </div>
+
+    <div id="screen-returns" class="screen" style="display:none;">
+
+      <div class="breadcrumb">
+        <a onclick="showScreen('dashboard','nav-dashboard')">Home</a>
+        &nbsp;&#8250;&nbsp; <span>Returns Filing</span>
+      </div>
+
+      <div class="myurns-header">
+        <div>
+          <div class="page-title">Returns Filing</div>
+          <div class="page-title-sub">Statutory quarterly returns for all active URNs</div>
+        </div>
+        <div style="position:relative;">
+          <button class="btn-primary" onclick="toggleDropdown('filingDropdown')">+ Start New Filing &nbsp;&#9660;</button>
+          <div id="filingDropdown" style="display:none; position:absolute; right:0; top:110%; background:#fff; border:1px solid #D0D5DC; border-radius:5px; min-width:230px; z-index:100; overflow:hidden;">
+            <div style="padding:7px 14px; font-size:10px; color:#8B98A8; text-transform:uppercase; letter-spacing:0.06em; border-bottom:1px solid #F0F2F5; background:#FAFBFC;">Select Form</div>
+            <div style="padding:9px 14px; font-size:12px; color:#1A2332; cursor:pointer; display:flex; align-items:center; gap:8px;" onmouseover="this.style.background='#F5F7FA'" onmouseout="this.style.background=''">
+              <span style="background:#EEF2F8;color:#1E4A8A;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700;">E</span>
+              Manufacturer Quarterly Return
+            </div>
+            <div style="padding:9px 14px; font-size:12px; color:#1A2332; cursor:pointer; display:flex; align-items:center; gap:8px;" onmouseover="this.style.background='#F5F7FA'" onmouseout="this.style.background=''">
+              <span style="background:#F0EEF8;color:#5A3A9A;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700;">H</span>
+              Inter-zone Movement Report
+            </div>
+            <div style="padding:9px 14px; font-size:12px; color:#1A2332; cursor:pointer; display:flex; align-items:center; gap:8px;" onmouseover="this.style.background='#F5F7FA'" onmouseout="this.style.background=''">
+              <span style="background:#EEF6F0;color:#1E6A40;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700;">L</span>
+              B2B / Broker Portal Return
+            </div>
+            <div style="border-top:1px solid #F0F2F5;"></div>
+            <div style="padding:9px 14px; font-size:12px; color:#C0C8D0; display:flex; align-items:center; gap:8px;" title="Consumer companies only">
+              <span style="background:#F0F2F5;color:#A0A8B0;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700;">F</span>
+              Consumer Return &nbsp;<span style="font-size:10px;">not applicable</span>
+            </div>
+            <div style="padding:9px 14px; font-size:12px; color:#C0C8D0; display:flex; align-items:center; gap:8px;" title="Inactive until NCB activates">
+              <span style="background:#F0F2F5;color:#A0A8B0;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700;">C/D</span>
+              Daily Register &nbsp;<span style="font-size:10px;">inactive</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alert bar -->
+      <div style="background:#FEF3E2;border:1px solid #F0D090;border-left:3px solid #B7751D;border-radius:0 5px 5px 0;padding:10px 16px;margin-bottom:16px;">
+        <span style="color:#B7751D;font-weight:600;font-size:12px;">3 returns due in 5 days</span>
+        <span style="color:#8B98A8;font-size:11px;margin-left:10px;">Deadline: 21 Jun 2026 &nbsp;·&nbsp; Missing this deadline will place your company on the Non-Filer List</span>
+      </div>
+
+      <!-- Pending Filings -->
+      <div style="background:#fff;border:1px solid #E0E4E8;border-radius:6px;margin-bottom:14px;">
+        <div class="section-hd">
+          <div class="section-title">Pending Filings</div>
+          <div style="font-size:10px;color:#B7751D;font-weight:700;">3 returns due &nbsp;·&nbsp; Q1 2026 (Jan – Mar)</div>
+        </div>
+
+        <div style="padding:12px 14px;border-bottom:1px solid #F2F4F6;display:flex;align-items:center;gap:14px;">
+          <div style="background:#EEF2F8;border-radius:4px;padding:7px 10px;text-align:center;flex-shrink:0;min-width:48px;">
+            <div style="font-size:15px;font-weight:700;color:#1E4A8A;line-height:1;">E</div>
+            <div style="font-size:9px;color:#5A7AAA;margin-top:2px;">Form</div>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:600;color:#1A2332;">Quarterly Return — Manufacture &amp; Sale</div>
+            <div style="font-size:11px;color:#7A8A9A;margin-top:3px;">
+              URN PREP/ZO-MH/2026/00142 &nbsp;·&nbsp;
+              <span style="background:#EEF2F8;color:#3A5080;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:600;">Acetic Anhydride</span>
+              &nbsp;·&nbsp; Q1 2026 &nbsp;·&nbsp; Mumbai Zone
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:10px;color:#B7751D;font-weight:600;margin-bottom:4px;">Due 21 Jun 2026</div>
+            <span style="display:inline-block;background:#FDECEA;color:#C0392B;border-radius:3px;padding:1px 6px;font-size:9px;font-weight:700;margin-bottom:6px;">Not Started</span><br>
+            <button class="action-btn">File Now &rarr;</button>
+          </div>
+        </div>
+
+        <div style="padding:12px 14px;border-bottom:1px solid #F2F4F6;display:flex;align-items:center;gap:14px;">
+          <div style="background:#EEF2F8;border-radius:4px;padding:7px 10px;text-align:center;flex-shrink:0;min-width:48px;">
+            <div style="font-size:15px;font-weight:700;color:#1E4A8A;line-height:1;">E</div>
+            <div style="font-size:9px;color:#5A7AAA;margin-top:2px;">Form</div>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:600;color:#1A2332;">Quarterly Return — Manufacture &amp; Sale</div>
+            <div style="font-size:11px;color:#7A8A9A;margin-top:3px;">
+              URN PREP/ZO-MH/2026/00142 &nbsp;·&nbsp;
+              <span style="background:#EEF2F8;color:#3A5080;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:600;">Ephedrine</span>
+              &nbsp;·&nbsp; Q1 2026 &nbsp;·&nbsp; Mumbai Zone
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:10px;color:#B7751D;font-weight:600;margin-bottom:4px;">Due 21 Jun 2026</div>
+            <span style="display:inline-block;background:#EAF5EE;color:#1E7B4B;border-radius:3px;padding:1px 6px;font-size:9px;font-weight:700;margin-bottom:6px;">Draft Saved</span><br>
+            <button class="action-btn">Continue &rarr;</button>
+          </div>
+        </div>
+
+        <div style="padding:12px 14px;display:flex;align-items:center;gap:14px;">
+          <div style="background:#EEF2F8;border-radius:4px;padding:7px 10px;text-align:center;flex-shrink:0;min-width:48px;">
+            <div style="font-size:15px;font-weight:700;color:#1E4A8A;line-height:1;">E</div>
+            <div style="font-size:9px;color:#5A7AAA;margin-top:2px;">Form</div>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:600;color:#1A2332;">Quarterly Return — Manufacture &amp; Sale</div>
+            <div style="font-size:11px;color:#7A8A9A;margin-top:3px;">
+              URN PREP/ZO-MH/2025/00089 &nbsp;·&nbsp;
+              <span style="background:#EEF2F8;color:#3A5080;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:600;">Pseudoephedrine</span>
+              &nbsp;·&nbsp; Q1 2026 &nbsp;·&nbsp; Mumbai Zone
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:10px;color:#B7751D;font-weight:600;margin-bottom:4px;">Due 21 Jun 2026</div>
+            <span style="display:inline-block;background:#FDECEA;color:#C0392B;border-radius:3px;padding:1px 6px;font-size:9px;font-weight:700;margin-bottom:6px;">Not Started</span><br>
+            <button class="action-btn">File Now &rarr;</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Submission History -->
+      <div style="background:#fff;border:1px solid #E0E4E8;border-radius:6px;">
+        <div class="section-hd" style="flex-wrap:wrap;gap:10px;">
+          <div class="section-title">Submission History</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <select style="padding:5px 8px;border:1px solid #D0D5DC;border-radius:4px;font-size:11px;font-family:inherit;color:#5A6474;background:#fff;">
+              <option>All Forms</option><option>Form E</option><option>Form H</option><option>Form L</option>
+            </select>
+            <select style="padding:5px 8px;border:1px solid #D0D5DC;border-radius:4px;font-size:11px;font-family:inherit;color:#5A6474;background:#fff;">
+              <option>All URNs</option><option>PREP/ZO-MH/2026/00142</option><option>PREP/ZO-MH/2025/00089</option>
+            </select>
+            <select style="padding:5px 8px;border:1px solid #D0D5DC;border-radius:4px;font-size:11px;font-family:inherit;color:#5A6474;background:#fff;">
+              <option>All Periods</option><option>Q4 2025</option><option>Q3 2025</option><option>Q2 2025</option>
+            </select>
+            <select style="padding:5px 8px;border:1px solid #D0D5DC;border-radius:4px;font-size:11px;font-family:inherit;color:#5A6474;background:#fff;">
+              <option>All Statuses</option><option>Submitted</option><option>Discrepancy Flagged</option><option>Revised</option>
+            </select>
+          </div>
+        </div>
+
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr>
+              <th style="padding:9px 14px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.07em;color:#8B98A8;font-weight:700;background:#FAFBFC;border-bottom:1px solid #E0E4E8;">Form</th>
+              <th style="padding:9px 14px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.07em;color:#8B98A8;font-weight:700;background:#FAFBFC;border-bottom:1px solid #E0E4E8;">URN &amp; Substance</th>
+              <th style="padding:9px 14px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.07em;color:#8B98A8;font-weight:700;background:#FAFBFC;border-bottom:1px solid #E0E4E8;">Period</th>
+              <th style="padding:9px 14px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.07em;color:#8B98A8;font-weight:700;background:#FAFBFC;border-bottom:1px solid #E0E4E8;">Submitted</th>
+              <th style="padding:9px 14px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.07em;color:#8B98A8;font-weight:700;background:#FAFBFC;border-bottom:1px solid #E0E4E8;">Status</th>
+              <th style="padding:9px 14px;background:#FAFBFC;border-bottom:1px solid #E0E4E8;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;vertical-align:middle;"><span style="background:#EEF2F8;border-radius:4px;padding:3px 8px;font-size:13px;font-weight:700;color:#1E4A8A;">E</span></td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;font-size:12px;vertical-align:middle;">
+                <div style="font-weight:500;color:#1A2332;">PREP/ZO-MH/2026/00142</div>
+                <span style="background:#EEF2F8;color:#3A5080;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:600;">Acetic Anhydride</span>
+              </td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;font-size:12px;color:#1A2332;vertical-align:middle;">Q4 2025</td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;font-size:12px;color:#5A6474;vertical-align:middle;">10 Jan 2026</td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;vertical-align:middle;"><span style="background:#F0F2F5;color:#5A6474;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:600;">Submitted</span></td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;vertical-align:middle;"><span class="rlink">View</span></td>
+            </tr>
+            <tr>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;vertical-align:middle;"><span style="background:#EEF2F8;border-radius:4px;padding:3px 8px;font-size:13px;font-weight:700;color:#1E4A8A;">E</span></td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;font-size:12px;vertical-align:middle;">
+                <div style="font-weight:500;color:#1A2332;">PREP/ZO-MH/2026/00142</div>
+                <span style="background:#EEF2F8;color:#3A5080;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:600;">Ephedrine</span>
+              </td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;font-size:12px;color:#1A2332;vertical-align:middle;">Q4 2025</td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;font-size:12px;color:#5A6474;vertical-align:middle;">10 Jan 2026</td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;vertical-align:middle;"><span style="background:#F0F2F5;color:#5A6474;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:600;">Submitted</span></td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;vertical-align:middle;"><span class="rlink">View</span></td>
+            </tr>
+            <tr style="background:#FFFBF5;">
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;vertical-align:middle;"><span style="background:#EEF2F8;border-radius:4px;padding:3px 8px;font-size:13px;font-weight:700;color:#1E4A8A;">E</span></td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;font-size:12px;vertical-align:middle;">
+                <div style="font-weight:500;color:#1A2332;">PREP/ZO-MH/2025/00089</div>
+                <span style="background:#EEF2F8;color:#3A5080;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:600;">Pseudoephedrine</span>
+              </td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;font-size:12px;color:#1A2332;vertical-align:middle;">Q4 2025</td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;font-size:12px;color:#5A6474;vertical-align:middle;">12 Jan 2026</td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;vertical-align:middle;"><span style="background:#FEF3E2;color:#B7751D;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:600;">&#9888; Discrepancy Flagged</span></td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;vertical-align:middle;"><span class="rlink" style="color:#C0392B;">View &amp; Respond</span></td>
+            </tr>
+            <tr>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;vertical-align:middle;"><span style="background:#F0EEF8;border-radius:4px;padding:3px 8px;font-size:13px;font-weight:700;color:#5A3A9A;">H</span></td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;font-size:12px;vertical-align:middle;">
+                <div style="font-weight:500;color:#1A2332;">PREP/ZO-MH/2026/00142</div>
+                <span style="background:#EEF2F8;color:#3A5080;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:600;">Acetic Anhydride</span>
+              </td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;font-size:12px;color:#1A2332;vertical-align:middle;">Q4 2025</td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;font-size:12px;color:#5A6474;vertical-align:middle;">10 Jan 2026</td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;vertical-align:middle;"><span style="background:#F0F2F5;color:#5A6474;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:600;">Submitted</span></td>
+              <td style="padding:10px 14px;border-bottom:1px solid #F2F4F6;vertical-align:middle;"><span class="rlink">View</span></td>
+            </tr>
+            <tr>
+              <td style="padding:10px 14px;vertical-align:middle;"><span style="background:#EEF2F8;border-radius:4px;padding:3px 8px;font-size:13px;font-weight:700;color:#1E4A8A;">E</span></td>
+              <td style="padding:10px 14px;font-size:12px;vertical-align:middle;">
+                <div style="font-weight:500;color:#1A2332;">PREP/ZO-MH/2026/00142</div>
+                <span style="background:#EEF2F8;color:#3A5080;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:600;">Acetic Anhydride</span>
+                <span style="background:#F2F0FA;color:#5A4090;border-radius:3px;padding:1px 5px;font-size:9px;font-weight:600;margin-left:3px;">Revised</span>
+              </td>
+              <td style="padding:10px 14px;font-size:12px;color:#1A2332;vertical-align:middle;">Q3 2025</td>
+              <td style="padding:10px 14px;font-size:12px;color:#5A6474;vertical-align:middle;">22 Oct 2025</td>
+              <td style="padding:10px 14px;vertical-align:middle;"><span style="background:#F2F0FA;color:#5A4090;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:600;">Revised</span></td>
+              <td style="padding:10px 14px;vertical-align:middle;"><span class="rlink">View</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="spacer"></div>
+    </div>
+
+    <div id="screen-substance" class="screen" style="display:none;">
+      <div class="breadcrumb"><a onclick="showScreen('dashboard','nav-dashboard')">Home</a> &nbsp;&#8250;&nbsp; <span>Substance Records</span></div>
+      <div style="background:#fff;border:1px solid #E0E4E8;border-radius:6px;padding:40px;text-align:center;color:#8B98A8;margin-top:20px;">
+        <div style="font-size:15px;font-weight:600;color:#3A4A5A;margin-bottom:8px;">Substance Records</div>
+        <div style="font-size:12px;">Stock overview and movement log — coming next.</div>
+      </div>
+    </div>
+
+    <div id="screen-ld" class="screen" style="display:none;">
+      <div class="breadcrumb"><a onclick="showScreen('dashboard','nav-dashboard')">Home</a> &nbsp;&#8250;&nbsp; <span>Loss &amp; Damage</span></div>
+      <div style="background:#fff;border:1px solid #E0E4E8;border-radius:6px;padding:40px;text-align:center;color:#8B98A8;margin-top:20px;">
+        <div style="font-size:15px;font-weight:600;color:#3A4A5A;margin-bottom:8px;">Loss &amp; Damage</div>
+        <div style="font-size:12px;">Incident reporting and case tracking — coming next.</div>
+      </div>
+    </div>
+
+    <div id="screen-profile" class="screen" style="display:none;">
+      <div class="breadcrumb"><a onclick="showScreen('dashboard','nav-dashboard')">Home</a> &nbsp;&#8250;&nbsp; <span>My Profile</span></div>
+      <div style="background:#fff;border:1px solid #E0E4E8;border-radius:6px;padding:40px;text-align:center;color:#8B98A8;margin-top:20px;">
+        <div style="font-size:15px;font-weight:600;color:#3A4A5A;margin-bottom:8px;">My Profile</div>
+        <div style="font-size:12px;">Company details, contact info, password settings — coming next.</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+
+<script>
+function toggleDropdown(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (el.style.display === 'block') {
+    el.style.display = 'none';
+    return;
+  }
+  el.style.display = 'block';
+  setTimeout(function() {
+    document.addEventListener('click', function closeDD(e) {
+      el.style.display = 'none';
+      document.removeEventListener('click', closeDD);
+    });
+  }, 0);
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+function expandSub(subId, arrowId) {
+  var sub = document.getElementById(subId);
+  var arrow = document.getElementById(arrowId);
+  if (!sub) return;
+  sub.style.display = 'block';
+  if (arrow) arrow.classList.add('open');
+}
+
+function showScreen(screenId, navId) {
+  document.querySelectorAll('.screen').forEach(function(s) {
+    s.style.display = 'none';
+  });
+  var target = document.getElementById('screen-' + screenId);
+  if (target) target.style.display = 'block';
+
+  document.querySelectorAll('.nav-item').forEach(function(n) {
+    n.classList.remove('active');
+  });
+  var navEl = document.getElementById(navId);
+  if (navEl) navEl.classList.add('active');
+
+  window.scrollTo(0, 0);
+}
+
+function filterUrns(type, tabEl) {
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  tabEl.classList.add('active');
+
+  var rows = document.querySelectorAll('.urn-full-table tbody tr');
+  rows.forEach(function(row) {
+    if (type === 'all') {
+      row.style.display = '';
+    } else if (type === 'active') {
+      row.style.display = row.classList.contains('row-active') && !row.classList.contains('row-pending') ? '' : 'none';
+    } else if (type === 'pending') {
+      row.style.display = row.classList.contains('row-pending') ? '' : 'none';
+    } else if (type === 'inactive') {
+      row.style.display = 'none';
+    }
+  });
+}
+</script>
+
+</body>
+</html>
